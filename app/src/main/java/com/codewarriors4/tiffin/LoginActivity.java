@@ -1,15 +1,20 @@
 package com.codewarriors4.tiffin;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -22,7 +27,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.codewarriors4.tiffin.services.HttpService;
+import com.codewarriors4.tiffin.utils.RequestPackage;
 import com.codewarriors4.tiffin.utils.Utils;
+import com.google.gson.Gson;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +46,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static Animation shakeAnimation;
     private static LinearLayout loginLayout;
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        public void onReceive(Context context, Intent intent) {
+            String str = (String) intent
+                    .getStringExtra(HttpService.MY_SERVICE_PAYLOAD);
+            Log.d("JsonResponseData", "onReceive: " + str);
+            Toast.makeText(context, str, Toast.LENGTH_SHORT)
+                    .show();
+            Gson gson = new Gson();
+            gson.
+            Intent demoIntent = new Intent(context, DemoActivity.class);
+            demoIntent.putExtra("response", str);
+            startActivity(demoIntent);
+
+        }
+    };
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +71,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         view = getLayoutInflater().inflate(R.layout.login_layout, container, false);
         initViews();
         setListeners();
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .registerReceiver(mBroadcastReceiver,
+                        new IntentFilter(HttpService.MY_SERVICE_MESSAGE));
     }
 
     private void initViews() {
@@ -172,10 +200,33 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             new CustomToast().Show_Toast(this, view,
                     "Your Email Id is Invalid.");
             // Else do login and do your stuff
-        else
+        else {
             Toast.makeText(this, "Do Login.", Toast.LENGTH_SHORT)
-                    .show();
+            .show();
+            loginHandler();
+        }
 
+    }
+
+    private void loginHandler()
+    {
+        RequestPackage requestPackage = new RequestPackage();
+        requestPackage.setEndPoint("http://10.192.78.23/tiffin_service/web/public/api/login");
+        requestPackage.setParam("email", emailid.getText().toString());
+        requestPackage.setParam("password", password.getText().toString());
+        requestPackage.setMethod("POST");
+        Intent intent = new Intent(this, HttpService.class);
+        intent.putExtra(HttpService.REQUEST_PACKAGE, requestPackage);
+
+        //intent.setData(Uri.parse(JSON_URL));
+        startService(intent);
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .unregisterReceiver(mBroadcastReceiver);
     }
 
 }

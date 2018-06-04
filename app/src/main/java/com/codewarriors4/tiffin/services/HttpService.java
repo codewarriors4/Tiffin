@@ -30,10 +30,10 @@ public class HttpService extends IntentService {
         String response;
         try {
             response = HttpHelper.downloadFromFeed(requestPackage);
-            Log.d("HttpResponse", "onHandleIntent: " + response);
+            Log.d("HttpResponse", "onHandleIntent: " + response.toString());
         } catch (IOException e) {
-            e.printStackTrace();
-            return;
+            Log.d("HttpResponse", "onHandleIntent_ERROR: " +  e.getMessage());
+            response = e.getMessage();
         }
 
         Intent messageIntent = new Intent(MY_SERVICE_MESSAGE);

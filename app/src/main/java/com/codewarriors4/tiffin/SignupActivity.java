@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.codewarriors4.tiffin.models.RegistrationModel;
 import com.codewarriors4.tiffin.services.HttpService;
@@ -29,19 +30,18 @@ import java.util.regex.Pattern;
 
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
     private static View view;
-    private static EditText fullName, emailId, mobileNumber, location,
-            password, confirmPassword;
+    private static EditText emailId, password, confirmPassword;
     private static TextView login;
     private static Button signUpButton;
     private static CheckBox terms_conditions;
-    private static Switch isHomemaker;
+    private static ToggleButton isHomemaker;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             String str = (String) intent
                     .getStringExtra(HttpService.MY_SERVICE_PAYLOAD);
-            Log.d("Data", "onReceive: " + str);
+            Log.d("JsonResponseData", "onReceive: " + str);
             Toast.makeText(context, str, Toast.LENGTH_SHORT)
                     .show();
 
@@ -61,15 +61,15 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initViews() {
-        fullName = (EditText) findViewById(R.id.fullName);
+
         emailId = (EditText) findViewById(R.id.userEmailId);
-        mobileNumber = (EditText) findViewById(R.id.mobileNumber);
+
         password = (EditText) findViewById(R.id.password);
         confirmPassword = (EditText) findViewById(R.id.confirmPassword);
         signUpButton = (Button) findViewById(R.id.signUpBtn);
         login = (TextView)findViewById(R.id.already_user);
         terms_conditions = (CheckBox) findViewById(R.id.terms_conditions);
-        isHomemaker = (Switch) findViewById(R.id.switch1);
+        isHomemaker = (ToggleButton) findViewById(R.id.toggleButton);
 
         // Setting text selector over textviews
         XmlResourceParser xrp = getResources().getXml(R.drawable.text_selector);
@@ -88,20 +88,18 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     private void checkValidation() {
 
         // Get all edittext texts
-        String getFullName = fullName.getText().toString();
+
         String getEmailId = emailId.getText().toString();
-        String getMobileNumber = mobileNumber.getText().toString();
+
         String getPassword = password.getText().toString();
         String getConfirmPassword = confirmPassword.getText().toString();
-
+        boolean isHomemakerChecked = isHomemaker.isChecked();
         // Pattern match for email id
         Pattern p = Pattern.compile(Utils.regEx);
         Matcher m = p.matcher(getEmailId);
 
         // Check if all strings are null or not
-        if (getFullName.equals("") || getFullName.length() == 0
-                || getEmailId.equals("") || getEmailId.length() == 0
-                || getMobileNumber.equals("") || getMobileNumber.length() == 0
+        if (getEmailId.equals("") || getEmailId.length() == 0
                 || getPassword.equals("") || getPassword.length() == 0
                 || getConfirmPassword.equals("")
                 || getConfirmPassword.length() == 0){
@@ -128,7 +126,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         else {
             Toast.makeText(this, "Do SignUp.", Toast.LENGTH_SHORT)
                     .show();
-            RegistrationModel reg = new RegistrationModel(getFullName, getEmailId, getMobileNumber, getPassword);
+            RegistrationModel reg = new RegistrationModel(getEmailId, getPassword, isHomemakerChecked ? 1 : 0, getConfirmPassword);
             signUpHandler(reg);
         }
 
@@ -139,9 +137,12 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         RequestPackage requestPackage = new RequestPackage();
         Gson gson = new Gson();
         String toJsonString = gson.toJson(reg);
-        requestPackage.setEndPoint("http://192.168.0.12/demo/index.php");
-        requestPackage.setParam("jsonData", toJsonString);
-        requestPackage.setMethod("JSON");
+        requestPackage.setEndPoint("http://10.192.78.23/tiffin_service/web/public/api/register");
+        requestPackage.setParam("email", reg.getEmailID());
+        requestPackage.setParam("password", reg.getPassword());
+        requestPackage.setParam("password_confirmation", reg.getConfirmPassword());
+        requestPackage.setParam("UserType", reg.getUserType()+"");
+        requestPackage.setMethod("POST");
         Intent intent = new Intent(this, HttpService.class);
         intent.putExtra(HttpService.REQUEST_PACKAGE, requestPackage);
 

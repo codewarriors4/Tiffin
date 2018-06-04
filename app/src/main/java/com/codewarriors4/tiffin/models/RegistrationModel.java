@@ -4,24 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class RegistrationModel implements Parcelable {
-    String fullName;
     String emailID;
-    String getMobileNumber;
     String password;
+    int  userType;
+    String confirmPassword;
 
-    public RegistrationModel(String fullName, String emailID, String getMobileNumber, String password) {
-        this.fullName = fullName;
+    public RegistrationModel(String emailID, String password, int userType, String confirmPassword) {
         this.emailID = emailID;
-        this.getMobileNumber = getMobileNumber;
         this.password = password;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.userType = userType;
+        this.confirmPassword = confirmPassword;
     }
 
     public String getEmailID() {
@@ -32,14 +24,6 @@ public class RegistrationModel implements Parcelable {
         this.emailID = emailID;
     }
 
-    public String getGetMobileNumber() {
-        return getMobileNumber;
-    }
-
-    public void setGetMobileNumber(String getMobileNumber) {
-        this.getMobileNumber = getMobileNumber;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -48,6 +32,23 @@ public class RegistrationModel implements Parcelable {
         this.password = password;
     }
 
+    public int getUserType() {
+        return userType;
+    }
+
+    public void setUserType(int userType) {
+        this.userType = userType;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
@@ -55,20 +56,17 @@ public class RegistrationModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.fullName);
         dest.writeString(this.emailID);
-        dest.writeString(this.getMobileNumber);
         dest.writeString(this.password);
-    }
-
-    public RegistrationModel() {
+        dest.writeInt(this.userType);
+        dest.writeString(this.confirmPassword);
     }
 
     protected RegistrationModel(Parcel in) {
-        this.fullName = in.readString();
         this.emailID = in.readString();
-        this.getMobileNumber = in.readString();
         this.password = in.readString();
+        this.userType = in.readInt();
+        this.confirmPassword = in.readString();
     }
 
     public static final Parcelable.Creator<RegistrationModel> CREATOR = new Parcelable.Creator<RegistrationModel>() {

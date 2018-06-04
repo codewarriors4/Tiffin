@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -32,19 +33,30 @@ public class HttpHelper {
         OkHttpClient client = new OkHttpClient();
 
         Request.Builder requestBuilder = new Request.Builder()
-                .url(address);
+                .url(address)
+                .addHeader("Accept", "application/json");
 
         if(requestPackage.getMethod().equals("POST")){
-            MultipartBody.Builder builder = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM);
+//            MultipartBody.Builder builder = new MultipartBody.Builder()
+//                    .setType(MultipartBody.FORM);
+//            Map<String, String> params = requestPackage.getParams();
+//            for (String key: params.keySet()) {
+//                builder.addFormDataPart(key, params.get(key));
+//            }
+//
+//            RequestBody requestBody = builder.build();
+//            requestBuilder.method("POST", requestBody);
             Map<String, String> params = requestPackage.getParams();
+            FormBody.Builder formData = new FormBody.Builder();
             for (String key: params.keySet()) {
-                builder.addFormDataPart(key, params.get(key));
-
+                formData.add(key, params.get(key));
             }
 
-            RequestBody requestBody = builder.build();
-            requestBuilder.method("POST", requestBody);
+            RequestBody formBody = formData.build();
+            requestBuilder.post(formBody);
+
+//                builder.addFormDataPart(key, params.get(key));
+//            }
         }
 
         if(requestPackage.getMethod().equals("JSON")){

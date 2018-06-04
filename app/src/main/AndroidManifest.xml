@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".LoginActivity">
         </activity>
+        <activity android:name=".DemoActivity">
+        </activity>
         <activity android:name=".SignupActivity"></activity>
 
         <service android:name=".services.HttpService" android:exported="false">
